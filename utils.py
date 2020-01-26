@@ -57,7 +57,9 @@ def seed_all(seed_value=42):
 def load_data(filename):
     with open(filename, 'r') as f:
         lines = [l.strip().split('\t') for l in f.readlines()]
-    return pd.DataFrame(lines[1:], columns=lines[0])
+    df = pd.DataFrame(lines[1:], columns=lines[0])
+    df.rename(columns={'tweet': 'text', 'subtask_a': 'target'}, inplace=True)
+    return df
 
 if __name__ == '__main__':
 	df = load_data('data/offenseval-ar-training-v1.tsv')
