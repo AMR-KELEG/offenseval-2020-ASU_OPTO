@@ -64,6 +64,13 @@ def load_data(filename):
     df.target = (df['target']=='OFF').astype(int)
     return df
 
+def load_dev_test(filename, test_ratio=0.5):
+    df = load_data(filename)
+    test_limit_index = int(test_ratio * df.shape[0])
+    test_df = df[:test_limit_index]
+    dev_df = df[test_limit_index:]
+    return dev_df, test_df
+
 if __name__ == '__main__':
 	df = load_data('data/offenseval-ar-training-v1.tsv')
 	print(df.sample())
