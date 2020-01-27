@@ -143,7 +143,7 @@ class BertModel(BaseModel):
     def save(self, **params):
         base_dir = params.get('base_dir', 'results')
         model_name = params.get('model_name', self.model_name)
-        timestamp = int(time.time())
+        timestamp = str(int(time.time()))
         results = params.get('results', {})
 
         # Make a directory in the form
