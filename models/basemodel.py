@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from utils import plot_confusion_matrix
-from sklearn.metrics import f1_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score, classification_report
 
 class BaseModel(ABC):
     def __init__(self):
@@ -47,6 +47,12 @@ class BaseModel(ABC):
         print('Accuracy {}\n F1 score {}\n"Precision/recall": {} / {}'.format(
             accuracy, f1, prec, recall))
         return None
+    
+    def classification_report(self, df):
+        y_pred = self.predict(df)
+        y_true = df['target']
+        print(classification_report(y_true, y_pred))
+        return classification_report(y_true, y_pred, output_dict=True)
 
     def plot_matrix(self, df):
         pred = self.predict(df)
