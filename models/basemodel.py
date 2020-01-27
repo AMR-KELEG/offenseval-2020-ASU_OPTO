@@ -11,11 +11,11 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def save(self):
+    def save(self, **params):
         pass
 
     @abstractmethod
-    def load(self, params):
+    def load(self, **params):
         '''params: a dictionary for the model's parameters '''
         pass
 

@@ -61,6 +61,7 @@ def load_data(filename):
         lines = [l.strip().split('\t') for l in f.readlines()]
     df = pd.DataFrame(lines[1:], columns=lines[0])
     df.rename(columns={'tweet': 'text', 'subtask_a': 'target'}, inplace=True)
+    df.target = (df['target']=='OFF').astype(int)
     return df
 
 if __name__ == '__main__':

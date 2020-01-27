@@ -1,5 +1,9 @@
 # Check vocab
 # Use CV
+import os
+import time
+import json
+from pathlib import Path
 import numpy as np
 from torch import tensor
 from torch import argmax, cat
@@ -28,7 +32,7 @@ class CustomDataset(Dataset):
 		label = item.target
 		X = self.encode(text)
 		return tensor(X), label
-	
+
 	def __len__(self):
 		return self.len
 
@@ -54,7 +58,7 @@ class BertModel(BaseModel):
 			**params)
 
 		if dev_df is not None:
-			test_dataloader = DataLoader(CustomDataset(dev_df, 
+			test_dataloader = DataLoader(CustomDataset(dev_df,
 				self.model_name, max_seq_length=75, pad_to_max_length=True),
 				**params)
 
@@ -123,7 +127,7 @@ class BertModel(BaseModel):
 				TN = sum(sum(TN, []))
 				FP = sum(sum(FP, []))
 				FN = sum(sum(FN, []))
-				
+
 				precision = 1.0 * TP / (TP+FP) if TP+FP else 0
 				recall = 1.0 * TP / (TP+FN) if TP+FN else 0
 				f1 = (precision * recall * 2) / (precision + recall) if precision + recall else 0
@@ -135,12 +139,30 @@ class BertModel(BaseModel):
 				'train_loss': train_losses,
 				'dev_f1': dev_f1,
 				'dev_loss': dev_losses}
-	# TODO: Refactor save, load
-	def save(self):
-		torch.save(self.model.state_dict(), 'models/bert.pth')
 
-	def load(self, params):
-		self.model.load_state_dict('models/bert.pth')
+	def save(self, **params):
+	    base_dir = params.get('base_dir', 'results')
+	    model_name = params.get('model_name', self.model_name)
+	    timestamp = int(time.time())
+	    results = params.get('results', {})
+
+	    # Make a directory in the form
+	    save_dir = Path(base_dir, timestamp)
+	    os.makedirs(save_dir)
+
+	    # Update the results
+	    results['save_timestamp'] = timestamp
+
+	    # Save the model and the results
+		torch.save(self.model.state_dict(), str(Path(save_dir, model_name)))
+		with open(str(Path(save_dir, 'results.json')), 'w') as f:
+		    json.dump(results, f)
+
+		# TODO: Prepare the error report (save the error dataframe)
+
+	def load(self, **params):
+	    model_name = params.get('model_name', None)
+		self.model.load_state_dict(model_name)
 
 	def predict(self, df, params=None):
 		if not params:
