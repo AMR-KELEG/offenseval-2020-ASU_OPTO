@@ -64,6 +64,29 @@ def load_data(filename):
     df.target = (df['target']=='OFF').astype(int)
     return df
 
+def load_dev_test(filename, test_ratio=0.5):
+    df = load_data(filename)
+    test_limit_index = int(test_ratio * df.shape[0])
+    test_df = df[:test_limit_index]
+    dev_df = df[test_limit_index:]
+    return dev_df, test_df
+
+def load_lev_data():
+    filename = 'data/L-HSAB'
+    with open(filename, 'r') as f:
+        lines = [l.strip().split('\t') for l in f.readlines()]
+    df = pd.DataFrame(lines[1:], columns=lines[0])
+    df.rename(columns={'Tweet': 'text', 'Class': 'target'}, inplace=True)
+    df.target = (df['target']!='normal').astype(int)
+    return df
+
+def load_tun_data():
+    filename = 'data/T-HSAB.xlsx'
+    df = pd.read_excel(filename, header=None)
+    df.rename(columns={0: 'text', 1: 'target'}, inplace=True)
+    df.target = (df['target']!='normal').astype(int)
+    return df
+
 if __name__ == '__main__':
 	df = load_data('data/offenseval-ar-training-v1.tsv')
 	print(df.sample())
