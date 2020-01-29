@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch import tensor
 from torch import argmax, cat
+from scipy.special import softmax
 from models.basemodel import BaseModel
 from transformers import AutoTokenizer, AutoModel, AutoModelForSequenceClassification
 from torch.utils.data import Dataset, DataLoader
@@ -41,6 +42,7 @@ class BertModel(BaseModel):
     def __init__(self, model_name):
         self.model_name = model_name
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name).cuda()
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def get_params(self):
         return self.model.parameters()
@@ -184,6 +186,13 @@ class BertModel(BaseModel):
             predictions.append(argmax(outputs, dim=1))
         return cat(predictions, dim=0).cpu().tolist()
 
+    def predict_prob(self, df):
+      self.model.eval()
+
+      return df['text'].apply(lambda sentence: softmax(self.model.forward(
+            torch.tensor([self.tokenizer.encode(
+            sentence, max_length=75, pad_to_max_length=True)]).cuda())[0][0].cpu().tolist()[1]))
+  
     def compute_metrics(self, tokens, labels):
         # TODO: Fix the loss function averaging
         self.model.eval()
