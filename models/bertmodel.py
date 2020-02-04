@@ -192,7 +192,14 @@ class BertModel(BaseModel):
       return df['text'].apply(lambda sentence: softmax(self.model.forward(
             torch.tensor([self.tokenizer.encode(
             sentence, max_length=75, pad_to_max_length=True)]).cuda())[0][0].cpu().tolist()[1]))
-  
+
+    def compute_classification_error(self, df):
+        return abs(0.5 - self.predict_prob(df))
+
+    def sample_worst_errors(self, df, sample_size=50):
+        df['classification_error'] = self.compute_classification_error(df)
+        return df.sort_values(by='classification_error').sample(sample_size)
+
     def compute_metrics(self, tokens, labels):
         # TODO: Fix the loss function averaging
         self.model.eval()
