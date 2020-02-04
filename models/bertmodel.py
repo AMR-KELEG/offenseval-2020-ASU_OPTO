@@ -191,7 +191,7 @@ class BertModel(BaseModel):
 
       return df['text'].apply(lambda sentence: softmax(self.model.forward(
             torch.tensor([self.tokenizer.encode(
-            sentence, max_length=75, pad_to_max_length=True)]).cuda())[0][0].cpu().tolist()[1]))
+            sentence, max_length=75, pad_to_max_length=True)]).cuda())[0][0].cpu().tolist())[1])
 
     def compute_classification_error(self, df):
         return abs(0.5 - self.predict_prob(df))
