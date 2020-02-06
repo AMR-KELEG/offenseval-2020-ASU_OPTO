@@ -1,3 +1,4 @@
+import re
 import os
 import glob
 import pandas as pd
@@ -56,12 +57,23 @@ def seed_all(seed_value=42):
         torch.backends.cudnn.deterministic = True  #needed
         torch.backends.cudnn.benchmark = False
 
+def clean_text(text):
+    # Replace line feed token with a space
+    text = re.sub('<LF>', ' ', text)
+
+    # Clean two or more repeated character suffixes
+    text = re.sub(r'(.)\1{1,}(\W|$)', r'\1 ', tweet)
+
+    # TODO: Handle emojis
+    return text
+
 def load_data(filename):
     with open(filename, 'r') as f:
         lines = [l.strip().split('\t') for l in f.readlines()]
     df = pd.DataFrame(lines[1:], columns=lines[0])
     df.rename(columns={'tweet': 'text', 'subtask_a': 'target'}, inplace=True)
     df.target = (df['target']=='OFF').astype(int)
+    df.text = df.text.apply(clean_text)
     return df
 
 def load_dev_test(filename, test_ratio=0.5):
@@ -78,6 +90,7 @@ def load_lev_data():
     df = pd.DataFrame(lines[1:], columns=lines[0])
     df.rename(columns={'Tweet': 'text', 'Class': 'target'}, inplace=True)
     df.target = (df['target']!='normal').astype(int)
+    df.text = df.text.apply(clean_text)
     return df
 
 def load_tun_data():
@@ -85,6 +98,7 @@ def load_tun_data():
     df = pd.read_excel(filename, header=None)
     df.rename(columns={0: 'text', 1: 'target'}, inplace=True)
     df.target = (df['target']!='normal').astype(int)
+    df.text = df.text.apply(clean_text)
     return df
 
 if __name__ == '__main__':
