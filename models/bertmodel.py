@@ -13,7 +13,7 @@ from models.basemodel import BaseModel
 from transformers import AutoTokenizer, AutoModel, AutoModelForSequenceClassification
 from torch.utils.data import Dataset, DataLoader
 from torch import nn, optim
-from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score
 
 class CustomDataset(Dataset):
     def __init__(self, dataframe, model_name, max_seq_length=75, pad_to_max_length=True):
@@ -106,9 +106,14 @@ class BertModel(BaseModel):
             FP = sum(sum(FP, []))
             FN = sum(sum(FN, []))
 
-            precision = 1.0 * TP / (TP+FP) if TP+FP else 0
-            recall = 1.0 * TP / (TP+FN) if TP+FN else 0
-            f1 = (precision * recall * 2) / (precision + recall) if precision + recall else 0
+            precision_1 = 1.0 * TP / (TP+FP) if TP+FP else 0
+            recall_1 = 1.0 * TP / (TP+FN) if TP+FN else 0
+            f1_1 = (precision_1 * recall_1 * 2) / (precision_1 + recall_1) if precision_1 + recall_1 else 0
+            
+            precision_0 = 1.0 * TN / (TN+FN) if TN+FN else 0
+            recall_0 = 1.0 * TN / (TN+FP) if TN+FP else 0
+            f1_0 = (precision_0 * recall_0 * 2) / (precision_0 + recall_0) if precision_0 + recall_0 else 0
+            f1 = (f1_0 + f1_1)/2
             print('F1 score', f1)
             train_losses.append(sum(losses) / len(train_dataloader))
             train_f1.append(f1)
@@ -131,16 +136,21 @@ class BertModel(BaseModel):
                 FP = sum(sum(FP, []))
                 FN = sum(sum(FN, []))
 
-                precision = 1.0 * TP / (TP+FP) if TP+FP else 0
-                recall = 1.0 * TP / (TP+FN) if TP+FN else 0
-                f1 = (precision * recall * 2) / (precision + recall) if precision + recall else 0
+                precision_1 = 1.0 * TP / (TP+FP) if TP+FP else 0
+                recall_1 = 1.0 * TP / (TP+FN) if TP+FN else 0
+                f1_1 = (precision_1 * recall_1 * 2) / (precision_1 + recall_1) if precision_1 + recall_1 else 0
+
+                precision_0 = 1.0 * TN / (TN+FN) if TN+FN else 0
+                recall_0 = 1.0 * TN / (TN+FP) if TN+FP else 0
+                f1_0 = (precision_0 * recall_0 * 2) / (precision_0 + recall_0) if precision_0 + recall_0 else 0
+                f1 = (f1_0 + f1_1)/2
                 print('F1 score', f1)
                 dev_losses.append(sum(losses) / len(test_dataloader))
                 dev_f1.append(f1)
 
-        return {'train_f1': train_f1,
+        return {'macro_train_f1': train_f1,
                 'train_loss': train_losses,
-                'dev_f1': dev_f1,
+                'macro_dev_f1': dev_f1,
                 'dev_loss': dev_losses}
 
     def save(self, **params):
@@ -148,6 +158,9 @@ class BertModel(BaseModel):
         model_name = params.get('model_name', self.model_name)
         timestamp = str(int(time.time()))
         results = params.get('results', {})
+        epochs = params.get('epochs', 'NA')
+        learning_rate = params.get('learning_rate', 'NA')
+        weight_decay = params.get('weight_decay', 'NA')
 
         # Make a directory in the form
         save_dir = Path(base_dir, timestamp)
@@ -155,6 +168,9 @@ class BertModel(BaseModel):
 
         # Update the results
         results['save_timestamp'] = timestamp
+        results['epochs'] = epochs
+        results['learning_rate'] = learning_rate
+        results['weight_decay'] = weight_decay
 
         # Save the model and the results
         torch.save(self.model.state_dict(), str(Path(save_dir, model_name)))
