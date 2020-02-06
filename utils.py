@@ -62,7 +62,7 @@ def clean_text(text):
     text = re.sub('<LF>', ' ', text)
 
     # Clean two or more repeated character suffixes
-    text = re.sub(r'(.)\1{1,}(\W|$)', r'\1 ', tweet)
+    text = re.sub(r'(.)\1{1,}(\W|$)', r'\1 ', text)
 
     # TODO: Handle emojis
     return text
