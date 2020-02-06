@@ -161,6 +161,7 @@ class BertModel(BaseModel):
         epochs = params.get('epochs', 'NA')
         learning_rate = params.get('learning_rate', 'NA')
         weight_decay = params.get('weight_decay', 'NA')
+        comment = params.get('comment', '')
 
         # Make a directory in the form
         save_dir = Path(base_dir, timestamp)
@@ -171,6 +172,7 @@ class BertModel(BaseModel):
         results['epochs'] = epochs
         results['learning_rate'] = learning_rate
         results['weight_decay'] = weight_decay
+        results['comment'] = comment
 
         # Save the model and the results
         torch.save(self.model.state_dict(), str(Path(save_dir, model_name)))
