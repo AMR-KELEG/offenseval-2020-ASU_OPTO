@@ -51,8 +51,8 @@ class BaseModel(ABC):
     def classification_report(self, df):
         y_pred = self.predict(df)
         y_true = df['target']
-        print(classification_report(y_true, y_pred))
-        return classification_report(y_true, y_pred, output_dict=True)
+        print(classification_report(y_true, y_pred, digits=3))
+        return classification_report(y_true, y_pred, digits=3, output_dict=True)
 
     def plot_matrix(self, df):
         pred = self.predict(df)
