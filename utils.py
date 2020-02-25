@@ -58,6 +58,7 @@ def seed_all(seed_value=42):
         torch.backends.cudnn.benchmark = False
 
 def clean_text(text):
+    # NOTE: THIS FUNCTION ISN'T USED BY ALL THE MODELS
     # Replace line feed token with a space
     text = re.sub('<LF>', ' ', text)
 
@@ -84,7 +85,7 @@ def load_dev_test(filename, test_ratio=0.5):
     return dev_df, test_df
 
 def load_lev_data():
-    filename = 'data/L-HSAB'
+    filename = 'data/external/L-HSAB'
     with open(filename, 'r') as f:
         lines = [l.strip().split('\t') for l in f.readlines()]
     df = pd.DataFrame(lines[1:], columns=lines[0])
@@ -94,7 +95,7 @@ def load_lev_data():
     return df
 
 def load_tun_data():
-    filename = 'data/T-HSAB.xlsx'
+    filename = 'data/external/T-HSAB.xlsx'
     df = pd.read_excel(filename, header=None)
     df.rename(columns={0: 'text', 1: 'target'}, inplace=True)
     df.target = (df['target']!='normal').astype(int)
@@ -102,5 +103,5 @@ def load_tun_data():
     return df
 
 if __name__ == '__main__':
-	df = load_data('data/offenseval-ar-training-v1.tsv')
+	df = load_data('data/offenseval/offenseval-ar-training-v1.tsv')
 	print(df.sample())
