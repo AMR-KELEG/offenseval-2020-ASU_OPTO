@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 class tfidfModel(BaseModel):
     def __init__(self):
-        self.pipeline = make_pipeline(TfidfVectorizer(ngram_range=(1, 3), analyzer='word'), LogisticRegression(random_state=42))
+        self.pipeline = make_pipeline(TfidfVectorizer(ngram_range=(1, 9), analyzer='char_wb'), LogisticRegression(random_state=42))
     
     def fit(self, train_df):
         self.pipeline.fit(train_df['text'], train_df['target'])
